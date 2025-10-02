@@ -1,7 +1,7 @@
-Dự án: Điều khiển 2 LED bằng serial monitor (ESP32 + OneButton)
+Dự án: Điều khiển 2 LED bằng serial monitor (ESP32)
 
 Giới thiệu
-Dự án sử dụng ESP32 và thư viện OneButton để điều khiển 2 LED chỉ bằng 1 nút nhấn.
+Dự án sử dụng ESP32 để điều khiển 2 LED bằng nút nhấn.
 
 Yêu cầu phần cứng
 - ESP32 DevKit  
