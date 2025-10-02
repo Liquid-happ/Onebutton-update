@@ -1,39 +1,37 @@
 #include <Arduino.h>
 
-#define LED1_PIN 2   
+#define LED1_PIN 2  
 #define LED2_PIN 4   
 
 bool ledState1 = false;
 bool ledState2 = false;
-bool blinking1 = false;
-bool blinking2 = false;
+bool blinking = false;
+int currentLed = 1;   
 
-void toggleLed1() {
-  if (!blinking1) {
+void toggleLed() {
+  blinking = false;
+  if (currentLed == 1) {
     ledState1 = !ledState1;
     digitalWrite(LED1_PIN, ledState1 ? HIGH : LOW);
-    Serial.println(ledState1 ? "LED1 bật" : "LED1 tắt");
-  }
-}
-
-void blinkLed1() {
-  blinking1 = !blinking1;
-  if (!blinking1) digitalWrite(LED1_PIN, LOW);
-  Serial.println(blinking1 ? "LED1 nhấp nháy" : "LED1 dừng nháy");
-}
-
-void toggleLed2() {
-  if (!blinking2) {
+  } else {
     ledState2 = !ledState2;
     digitalWrite(LED2_PIN, ledState2 ? HIGH : LOW);
-    Serial.println(ledState2 ? "LED2 bật" : "LED2 tắt");
   }
+  Serial.print("Toggled LED ");
+  Serial.println(currentLed);
 }
 
-void blinkLed2() {
-  blinking2 = !blinking2;
-  if (!blinking2) digitalWrite(LED2_PIN, LOW);
-  Serial.println(blinking2 ? "LED2 nhấp nháy" : "LED2 dừng nháy");
+void switchLed() {
+  blinking = false;
+  currentLed = (currentLed == 1) ? 2 : 1;
+  Serial.print("Chuyển sang điều khiển LED ");
+  Serial.println(currentLed);
+}
+
+void startBlinking() {
+  blinking = true;
+  Serial.print("Bắt đầu nhấp nháy LED ");
+  Serial.println(currentLed);
 }
 
 void setup() {
@@ -42,33 +40,32 @@ void setup() {
   Serial.begin(115200);
 
   Serial.println("===== Hướng dẫn =====");
-  Serial.println("Serial Monitor:");
-  Serial.println(" - '1' : LED1 bật/tắt");
-  Serial.println(" - '2' : LED1 nhấp nháy/dừng nháy");
-  Serial.println(" - 'a' : LED2 bật/tắt");
-  Serial.println(" - 'b' : LED2 nhấp nháy/dừng nháy");
+  Serial.println("Gõ số và Enter trong Serial Monitor:");
+  Serial.println("1: Bật/tắt LED");
+  Serial.println("2: Chuyển LED1 <-> LED2");
+  Serial.println("3: Nhấp nháy LED");
 }
 
 void loop() {
   if (Serial.available() > 0) {
     char cmd = Serial.read();
-    if (cmd == '1') toggleLed1();
-    else if (cmd == '2') blinkLed1();
-    else if (cmd == 'a') toggleLed2();
-    else if (cmd == 'b') blinkLed2();
+    if (cmd == '1') toggleLed();
+    else if (cmd == '2') switchLed();
+    else if (cmd == '3') startBlinking();
   }
 
-  if (blinking1) {
-    digitalWrite(LED1_PIN, HIGH);
-    delay(200);
-    digitalWrite(LED1_PIN, LOW);
-    delay(200);
-  }
 
-  if (blinking2) {
-    digitalWrite(LED2_PIN, HIGH);
-    delay(200);
-    digitalWrite(LED2_PIN, LOW);
-    delay(200);
+  if (blinking) {
+    if (currentLed == 1) {
+      digitalWrite(LED1_PIN, HIGH);
+      delay(200);
+      digitalWrite(LED1_PIN, LOW);
+      delay(200);
+    } else {
+      digitalWrite(LED2_PIN, HIGH);
+      delay(200);
+      digitalWrite(LED2_PIN, LOW);
+      delay(200);
+    }
   }
 }
