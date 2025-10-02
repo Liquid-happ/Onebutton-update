@@ -1,56 +1,74 @@
 #include <Arduino.h>
-#include <OneButton.h>
 
-#define LED1_PIN 2
-#define LED2_PIN 4
-#define BUTTON_PIN 0
+#define LED1_PIN 2   
+#define LED2_PIN 4   
 
-OneButton button(BUTTON_PIN, true);
+bool ledState1 = false;
+bool ledState2 = false;
+bool blinking1 = false;
+bool blinking2 = false;
 
-bool led1State = false;
-bool led2State = false;
-bool blinkMode = false;
-int currentLed = 1; // 1 = LED1, 2 = LED2
-
-void handleClick() {
-  blinkMode = false; 
-  if (currentLed == 1) {
-    led1State = !led1State;
-    digitalWrite(LED1_PIN, led1State ? HIGH : LOW);
-  } else {
-    led2State = !led2State;
-    digitalWrite(LED2_PIN, led2State ? HIGH : LOW);
+void toggleLed1() {
+  if (!blinking1) {
+    ledState1 = !ledState1;
+    digitalWrite(LED1_PIN, ledState1 ? HIGH : LOW);
+    Serial.println(ledState1 ? "LED1 bật" : "LED1 tắt");
   }
 }
 
-void handleDoubleClick() {
-  blinkMode = false;
-  currentLed = (currentLed == 1) ? 2 : 1; // Chuyển đổi LED điều khiển
+void blinkLed1() {
+  blinking1 = !blinking1;
+  if (!blinking1) digitalWrite(LED1_PIN, LOW);
+  Serial.println(blinking1 ? "LED1 nhấp nháy" : "LED1 dừng nháy");
 }
 
-void handleLongPressStart() {
-  blinkMode = true;
+void toggleLed2() {
+  if (!blinking2) {
+    ledState2 = !ledState2;
+    digitalWrite(LED2_PIN, ledState2 ? HIGH : LOW);
+    Serial.println(ledState2 ? "LED2 bật" : "LED2 tắt");
+  }
+}
+
+void blinkLed2() {
+  blinking2 = !blinking2;
+  if (!blinking2) digitalWrite(LED2_PIN, LOW);
+  Serial.println(blinking2 ? "LED2 nhấp nháy" : "LED2 dừng nháy");
 }
 
 void setup() {
   pinMode(LED1_PIN, OUTPUT);
   pinMode(LED2_PIN, OUTPUT);
-  digitalWrite(LED1_PIN, LOW);
-  digitalWrite(LED2_PIN, LOW);
+  Serial.begin(115200);
 
-  button.attachClick(handleClick);
-  button.attachDoubleClick(handleDoubleClick);
-  button.attachLongPressStart(handleLongPressStart);
+  Serial.println("===== Hướng dẫn =====");
+  Serial.println("Serial Monitor:");
+  Serial.println(" - '1' : LED1 bật/tắt");
+  Serial.println(" - '2' : LED1 nhấp nháy/dừng nháy");
+  Serial.println(" - 'a' : LED2 bật/tắt");
+  Serial.println(" - 'b' : LED2 nhấp nháy/dừng nháy");
 }
 
 void loop() {
-  button.tick();
+  if (Serial.available() > 0) {
+    char cmd = Serial.read();
+    if (cmd == '1') toggleLed1();
+    else if (cmd == '2') blinkLed1();
+    else if (cmd == 'a') toggleLed2();
+    else if (cmd == 'b') blinkLed2();
+  }
 
-  if (blinkMode) {
-    int pin = (currentLed == 1) ? LED1_PIN : LED2_PIN;
-    digitalWrite(pin, HIGH);
+  if (blinking1) {
+    digitalWrite(LED1_PIN, HIGH);
     delay(200);
-    digitalWrite(pin, LOW);
+    digitalWrite(LED1_PIN, LOW);
+    delay(200);
+  }
+
+  if (blinking2) {
+    digitalWrite(LED2_PIN, HIGH);
+    delay(200);
+    digitalWrite(LED2_PIN, LOW);
     delay(200);
   }
 }
